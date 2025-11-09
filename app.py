@@ -13,7 +13,7 @@ df_clean = clean_tt_data(df_raw)
 # Show preview
 st.subheader("Data Preview")
 st.dataframe(df_clean.head())
-st.dataframe(df_clean[["start_date", "end_date", "duration_minutes"]].head())
+st.dataframe(df_clean[["siteid", "start_date", "end_date", "duration_minutes"]].head())
 
 # Example chart
 st.subheader("Quick Visualization")
