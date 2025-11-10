@@ -1,3 +1,4 @@
 streamlit
 pandas
 openpyxl   # for Excel support
+matplotlib

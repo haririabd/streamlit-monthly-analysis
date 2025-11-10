@@ -2,6 +2,7 @@ import streamlit as st
 from utils.data_loader import load_excel
 from utils.data_cleaner import clean_tt_data
 from utils.month_filter import get_month_filters
+from utils.graph import plot_top10_sites_by_downtime
 
 st.set_page_config(page_title="Excel Streamlit Demo", layout="wide")
 
@@ -29,4 +30,8 @@ st.dataframe(df_clean.head())
 
 # Example chart
 st.subheader("Quick Visualization")
-st.bar_chart(df_clean.select_dtypes(include="number"))
+col1, col2 = st.columns(2)
+with col1:
+    st.pyplot(plot_top10_sites_by_downtime(df_clean))
+with col2:
+    pass
