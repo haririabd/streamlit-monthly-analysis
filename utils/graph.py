@@ -1,9 +1,14 @@
 import matplotlib.pyplot as plt
 
+def format_duration(hours):
+    days = int(hours // 24)
+    remaining_hours = int(hours % 24)
+    return f"{days}d {remaining_hours}h"
+
 def plot_top10_sites_by_downtime(df):
     # Aggregate top 10 sites
     top_sites = (
-        df.groupby("siteid")["duration_minutes"]
+        df.groupby("siteid")["duration_hours"]
         .sum()
         .sort_values(ascending=False)
         .head(10)
@@ -18,19 +23,22 @@ def plot_top10_sites_by_downtime(df):
     fig, ax = plt.subplots(figsize=(8, 4), facecolor="none")
 
     # Plot bars with reduced gap (height controls thickness)
-    ax.barh(y_positions, values, height=0.7, color="#4DA8DA", edgecolor="black")
+    ax.barh(y_positions, values, height=0.8, color="#CE4DDA", edgecolor="black")
 
     # Add value labels
     for i, value in enumerate(values):
         offset = value * 0.02  # 2% of the bar length
-        ax.text(value + offset, i, f"{value:.2f}", va="center", ha="left", fontsize=10, color="black")
+        label = format_duration(value)
+
+        ax.text(value + offset, i, label, va="center", ha="left", fontsize=10)
 
     # Set y-axis labels
     ax.set_yticks(y_positions)
     ax.set_yticklabels(labels)
+    ax.tick_params(axis="y", length=0)  # ← removes the tick lines
 
     # Style
-    ax.set_xlabel("Total Downtime (minutes)")
+    ax.set_xlabel("Total Downtime (Hours)")
     ax.set_ylabel("Site ID")
     ax.set_title("Top 10 Sites by Downtime", fontsize=14, weight="bold")
     ax.invert_yaxis()
