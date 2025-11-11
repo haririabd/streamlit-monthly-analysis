@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
 
-def format_duration(hours):
-    days = int(hours // 24)
-    remaining_hours = int(hours % 24)
-    return f"{days}d {remaining_hours}h"
+def format_duration(days):
+    day = int(days // 1)
+    remaining_hours = int((days % 1) * 24)
+    return f"{day}d {remaining_hours}h"
 
 def plot_top10_sites_by_downtime(df):
     # Aggregate top 10 sites
     top_sites = (
-        df.groupby("siteid")["duration_hours"]
+        df.groupby("siteid")["duration_days"]
         .sum()
         .sort_values(ascending=False)
         .head(10)
@@ -38,7 +38,7 @@ def plot_top10_sites_by_downtime(df):
     ax.tick_params(axis="y", length=0)  # ← removes the tick lines
 
     # Style
-    ax.set_xlabel("Total Downtime (Hours)")
+    ax.set_xlabel("Total Downtime (Days)")
     ax.set_ylabel("Site ID")
     ax.set_title("Top 10 Sites by Downtime", fontsize=14, weight="bold")
     ax.invert_yaxis()

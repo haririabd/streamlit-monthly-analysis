@@ -10,7 +10,8 @@ def clean_tt_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Calculate duration in minutes and hours
     df["duration_minutes"] = (df["end_date"] - df["start_date"]).dt.total_seconds() / 60
-    df["duration_hours"] = (df["duration_minutes"] / 60).round(2)
+    df["duration_hours"] = (df["duration_minutes"] / 60)
+    df["duration_days"] = (df["duration_hours"] / 24).round(2)
 
     # Optional: round duration
     df["duration_minutes"] = df["duration_minutes"].round(2)
