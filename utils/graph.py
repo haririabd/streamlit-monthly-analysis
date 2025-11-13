@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
+df_clean = df_clean.dropna(subset=["end_date"])
+
 def format_duration(days):
     day = int(days // 1)
     remaining_hours = int((days % 1) * 24)

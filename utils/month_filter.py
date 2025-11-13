@@ -12,3 +12,5 @@ def get_month_filters(df: pd.DataFrame):
         "last": last_month,
         "previous": prev_month
     }
+
+
