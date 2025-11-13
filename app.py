@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
-import altair as alt
 from datetime import datetime
 from utils.data_loader import load_excel
 from utils.data_cleaner import clean_tt_data
 from utils.month_filter import get_month_filters
+from utils.graph_altair import build_downtime_table, plot_top10_sites_by_downtime_altair
 
 st.set_page_config(
     page_title="5G Outage Analysis Dashboard",
@@ -46,7 +46,7 @@ with st.container():
         border=True, height="stretch", vertical_alignment="center"
         )
     col3 = cols[0].container(
-        border=True, height="stretch", vertical_alignment="center"
+        border=False, height="stretch", vertical_alignment="center"
         )
     
     with col1:
@@ -63,4 +63,7 @@ with st.container():
             selected_label = selected_period.strftime("%B %Y")
     
     with col2:
-        st.dataframe(df_clean.head())
+        st.altair_chart(plot_top10_sites_by_downtime_altair(df_selected), width="stretch")
+        
+    with col3:
+        st.dataframe(build_downtime_table(df_selected))
