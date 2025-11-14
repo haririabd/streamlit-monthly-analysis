@@ -40,19 +40,22 @@ def plot_top10_sites_by_downtime_altair(df):
 
     labels = base.mark_text(
         align="left", baseline="middle", dx=3,
-        color="#e2e8f0", font="Space Grotesk", fontSize=14
+        color="#e2e8f0", font="Helvetica", fontSize=14
     ).encode(
         text="Readable Duration"
     )
 
     chart = (bars + labels).properties(
         title="Top 10 Sites with Highest Downtime",
-        height=300
+        height=450
     ).configure_title(
-        font="Space Grotesk",
+        font="Helvetica",
         fontSize=18,
         fontWeight="bold",
         color="#e2e8f0"
+    ).configure_axisY(
+        labelFont="Arial",
+        labelFontSize=14
     )
 
     return chart
