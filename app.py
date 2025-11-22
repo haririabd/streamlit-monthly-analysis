@@ -4,7 +4,7 @@ from datetime import datetime
 from utils.data_loader import load_excel
 from utils.data_cleaner import clean_tt_data
 from utils.month_filter import get_month_filters
-from utils.graph_altair import build_downtime_table, plot_top10_sites_by_downtime_altair
+from utils.graph_altair import build_downtime_table, plot_top10_sites_by_downtime_altair, plot_top_repeated_sites_bar, plot_repeated_sites_comparison
 
 st.set_page_config(
     page_title="5G Outage Analysis Dashboard",
@@ -27,7 +27,6 @@ df_clean = df_clean.dropna(subset=["end_date"])
 
 today = datetime.today()
 current_period = pd.Period(today, freq="M")
-last_period = current_period - 1
 current_month_name = datetime.now().strftime("%B %Y")  # e.g., "November"
     
 # Filtering data set based on user's month selection
@@ -53,11 +52,12 @@ with st.container():
         # Frontend Month Selection
         month_options = sorted(df_clean["month"].dropna().unique(), reverse=True)
         selected_period = st.selectbox("Select a month to view:", month_options)
-        df_selected = df_clean[df_clean["month"] == selected_period]
+        previous_period = selected_period - 1  # subtract one month
+        df_selected = df_clean[df_clean["month"] == selected_period] # subset of df_clean, contains only the selected month
         
         if selected_period == current_period:
             selected_label = "Current Month"
-        elif selected_period == last_period:
+        elif selected_period == previous_period:
             selected_label = "Last Month"
         else:
             selected_label = selected_period.strftime("%B %Y")
@@ -67,3 +67,17 @@ with st.container():
         
     with col3:
         st.dataframe(build_downtime_table(df_selected))
+
+with st.container():
+    cols = st.columns([1, 1])
+    col1 = cols[0].container(
+        border=True, height="stretch", vertical_alignment="center"
+        )
+    col2 = cols[1].container(
+        border=True, height="stretch", vertical_alignment="center"
+        )
+    
+    with col1:
+        st.altair_chart(plot_repeated_sites_comparison(df_clean, selected_period, previous_period), width="stretch")
+    with col2:
+        st.altair_chart(plot_top_repeated_sites_bar(df_selected), width="stretch")

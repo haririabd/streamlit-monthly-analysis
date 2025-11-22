@@ -19,11 +19,57 @@ def get_top_sites_by_downtime_df(df, top_n=10):
     durations = pd.to_numeric(top_sites.values, errors="coerce")
     readable = [format_duration(d) for d in durations]
 
+# Explicit DataFrame construction here because we’re adding derived columns
+# (like Readable Duration) alongside the aggregated values.
     return pd.DataFrame({
         "SiteID": top_sites.index,
         "Max Downtime (days)": durations,
         "Readable Duration": readable
     })
+    
+def get_top_repeated_sites(df, top_n=10):
+    site_counts = (
+        df["siteid"]
+        .value_counts()
+        .reset_index()
+    )
+    site_counts.columns = ["SiteID", "Count"]
+    
+    return site_counts.head(top_n)
+
+def get_repeated_sites_comparison(df, current_period, last_period, top_n=10):
+    # Current month counts
+    current_counts = (
+        df[df["month"] == current_period]["siteid"]
+        .value_counts()
+        .reset_index()
+    )
+    current_counts.columns = ["SiteID", "CurrentCount"]
+    
+    # Previous month counts
+    last_counts = (
+        df[df["month"] == last_period]["siteid"]
+        .value_counts()
+        .reset_index()
+    )
+    last_counts.columns = ["SiteID", "LastCount"]
+
+    # Merge both
+    merged = pd.merge(current_counts, last_counts, on="SiteID", how="left").fillna(0)
+
+    # Keep top N sites by current month count
+    merged = merged.sort_values("CurrentCount", ascending=False).head(top_n)
+
+    return merged
+
+def reshape_for_altair(merged):
+    chart_data = merged.melt(
+        id_vars="SiteID",
+        value_vars=["CurrentCount", "LastCount"],
+        var_name="Month",
+        value_name="Count"
+    )
+    return chart_data
 
 # Chart
 def plot_top10_sites_by_downtime_altair(df):
@@ -34,7 +80,7 @@ def plot_top10_sites_by_downtime_altair(df):
         y=alt.Y("SiteID:N", sort="-x", title="Site ID")
     )
 
-    bars = base.mark_bar(color="#615fff").encode(
+    bars = base.mark_bar(color="#9273c8").encode(
         tooltip=["SiteID", "Max Downtime (days)", "Readable Duration"]
     )
 
@@ -63,3 +109,78 @@ def plot_top10_sites_by_downtime_altair(df):
 # Table
 def build_downtime_table(df):
     return get_top_sites_by_downtime_df(df)
+
+def plot_repeated_sites_comparison(df, current_period, last_period, top_n=10):
+    merged = get_repeated_sites_comparison(df, current_period, last_period, top_n)
+    chart_data = reshape_for_altair(merged)
+
+    chart = (
+        alt.Chart(chart_data)
+        .mark_line(point=True)
+        .encode(
+            x=alt.X("SiteID:N", sort=list(merged["SiteID"]), title="Site ID"),
+            y=alt.Y("Count:Q", title="Number of Downtime Events"),
+            color=alt.Color("Month:N", title="Period",
+                            scale=alt.Scale(domain=["CurrentCount", "LastCount"],
+                                            range=["#9273c8", "#86c9c7"])),
+            tooltip=["SiteID", "Month", "Count"]
+        )
+        .properties(
+            title=f"Top {top_n} Sites with Most Repeated Downtime (Current vs Previous Month)",
+            height=450
+        )
+        .configure_title(
+            font="Helvetica",
+            fontSize=18,
+            fontWeight="bold",
+            color="#e2e8f0"
+        )
+    )
+
+    return chart
+
+def plot_top_repeated_sites_bar(df, top_n=10):
+    chart_data = get_top_repeated_sites(df, top_n)
+
+    chart = (
+        alt.Chart(chart_data)
+        .mark_bar(color="#9273c8")
+        .encode(
+            x=alt.X("Count:Q", title="Number of Downtime Events"),
+            y=alt.Y("SiteID:N", sort="-x", title="Site ID"),
+            tooltip=[
+                alt.Tooltip("SiteID:N", title="Site ID"),
+                alt.Tooltip("Count:Q", title="Events")
+            ]
+        )
+        .properties(
+            title=f"Top {top_n} Sites with Most Repeated Downtime",
+            height=450
+        )
+        .configure_title(
+            font="Helvetica",
+            fontSize=18,
+            fontWeight="bold",
+            color="#e2e8f0"
+        )
+        .configure_axisX(
+            labelFont="Helvetica",
+            labelFontSize=12,
+            labelColor="#e2e8f0",
+            titleFont="Helvetica",
+            titleFontSize=14,
+            titleColor="#e2e8f0"
+        )
+        .configure_axisY(
+            labelFont="Helvetica",
+            labelFontSize=12,
+            labelColor="#e2e8f0",
+            titleFont="Helvetica",
+            titleFontSize=14,
+            titleColor="#e2e8f0"
+        )
+    )
+
+    return chart
+
+    
