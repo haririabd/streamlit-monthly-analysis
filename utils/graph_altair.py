@@ -37,35 +37,36 @@ def get_top_repeated_sites(df, top_n=10):
     
     return site_counts.head(top_n)
 
-def get_repeated_sites_comparison(df, current_period, last_period, top_n=10):
+def get_repeated_sites_comparison(df, selected_period, previous_period, top_n=10):
     # Current month counts
     current_counts = (
-        df[df["month"] == current_period]["siteid"]
+        df[df["month"] == selected_period]["siteid"]
         .value_counts()
         .reset_index()
     )
-    current_counts.columns = ["SiteID", "CurrentCount"]
+    current_counts.columns = ["SiteID", selected_period.strftime("%b %Y")
+]
     
     # Previous month counts
     last_counts = (
-        df[df["month"] == last_period]["siteid"]
+        df[df["month"] == previous_period]["siteid"]
         .value_counts()
         .reset_index()
     )
-    last_counts.columns = ["SiteID", "LastCount"]
+    last_counts.columns = ["SiteID", previous_period.strftime("%b %Y")]
+
 
     # Merge both
     merged = pd.merge(current_counts, last_counts, on="SiteID", how="left").fillna(0)
 
     # Keep top N sites by current month count
-    merged = merged.sort_values("CurrentCount", ascending=False).head(top_n)
+    merged = merged.sort_values(selected_period.strftime("%b %Y"), ascending=False).head(top_n)
 
     return merged
 
 def reshape_for_altair(merged):
     chart_data = merged.melt(
         id_vars="SiteID",
-        value_vars=["CurrentCount", "LastCount"],
         var_name="Month",
         value_name="Count"
     )
@@ -86,7 +87,7 @@ def plot_top10_sites_by_downtime_altair(df):
 
     labels = base.mark_text(
         align="left", baseline="middle", dx=3,
-        color="#e2e8f0", font="Helvetica", fontSize=14
+        color="#e2e8f0", fontSize=14
     ).encode(
         text="Readable Duration"
     )
@@ -110,8 +111,8 @@ def plot_top10_sites_by_downtime_altair(df):
 def build_downtime_table(df):
     return get_top_sites_by_downtime_df(df)
 
-def plot_repeated_sites_comparison(df, current_period, last_period, top_n=10):
-    merged = get_repeated_sites_comparison(df, current_period, last_period, top_n)
+def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=10):
+    merged = get_repeated_sites_comparison(df, selected_period, previous_period, top_n)
     chart_data = reshape_for_altair(merged)
 
     chart = (
@@ -119,15 +120,19 @@ def plot_repeated_sites_comparison(df, current_period, last_period, top_n=10):
         .mark_line(point=True)
         .encode(
             x=alt.X("SiteID:N", sort=list(merged["SiteID"]), title="Site ID"),
-            y=alt.Y("Count:Q", title="Number of Downtime Events"),
-            color=alt.Color("Month:N", title="Period",
-                            scale=alt.Scale(domain=["CurrentCount", "LastCount"],
-                                            range=["#9273c8", "#86c9c7"])),
+            y=alt.Y("Count:Q", title="Downtime Frequency"),
+            color=alt.Color("Month:N", title="Month",
+                            scale=alt.Scale(range=["#9273c8", "#86c9c7"])),
             tooltip=["SiteID", "Month", "Count"]
         )
         .properties(
-            title=f"Top {top_n} Sites with Most Repeated Downtime (Current vs Previous Month)",
+            title=f"Top {top_n} Sites with Most Repeated Downtime ({selected_period.strftime('%b %Y')} vs {previous_period.strftime('%b %Y')})",
             height=450
+        )
+        .configure_axisX(
+        labelAngle=-45,   # slant labels at -45 degrees
+        labelFont="Arial",
+        labelFontSize=12
         )
         .configure_title(
             font="Helvetica",
@@ -146,11 +151,11 @@ def plot_top_repeated_sites_bar(df, top_n=10):
         alt.Chart(chart_data)
         .mark_bar(color="#9273c8")
         .encode(
-            x=alt.X("Count:Q", title="Number of Downtime Events"),
+            x=alt.X("Count:Q", title="Downtime Frequency"),
             y=alt.Y("SiteID:N", sort="-x", title="Site ID"),
             tooltip=[
                 alt.Tooltip("SiteID:N", title="Site ID"),
-                alt.Tooltip("Count:Q", title="Events")
+                alt.Tooltip("Count:Q", title="Frequency")
             ]
         )
         .properties(
@@ -164,7 +169,7 @@ def plot_top_repeated_sites_bar(df, top_n=10):
             color="#e2e8f0"
         )
         .configure_axisX(
-            labelFont="Helvetica",
+            labelFont="Arial",
             labelFontSize=12,
             labelColor="#e2e8f0",
             titleFont="Helvetica",
@@ -172,8 +177,8 @@ def plot_top_repeated_sites_bar(df, top_n=10):
             titleColor="#e2e8f0"
         )
         .configure_axisY(
-            labelFont="Helvetica",
-            labelFontSize=12,
+            labelFont="Arial",
+            labelFontSize=14,
             labelColor="#e2e8f0",
             titleFont="Helvetica",
             titleFontSize=14,

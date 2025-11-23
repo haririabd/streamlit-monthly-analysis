@@ -15,7 +15,7 @@ borderColor = "#314158"
 dataframeHeaderBackgroundColor = "#1d293d"
 
 # Base text
-font = "Helvetica"
+font = "Arial"
 baseFontWeight = 300
 baseFontSize = 14
 
