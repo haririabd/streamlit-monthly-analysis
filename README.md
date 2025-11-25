@@ -69,4 +69,4 @@ Streamlit theme is configured in ```.streamlit/config.toml.```
 ### Notes
 
 - The loader function ```utils.data_loader.load_excel``` looks in the ```source/``` directory, add the Excel source file there.
-- Month fields are pandas Period objects — filters use ```utils.month_filter.get_month_filters``
+- Month fields are pandas Period objects — filters use ```utils.month_filter.get_month_filters```
