@@ -1,19 +1,25 @@
-# Streamlit Monthly Outage Analysis
+# Lightweight Automated Streamlit Outage Analysis Dashboard
 
-Lightweight Streamlit dashboard for monthly 5G outage / downtime analysis built from Excel TT (trouble ticket) data.
+A lightweight, automated pipeline for tracking site outages and generating monthly downtime reports.
+Designed to ingest vendor email notifications, parse unstructured data, and visualize network availability metrics via Streamlit
 
 Repository files:
-- [.gitignore](.gitignore)
-- [app.py](app.py)
-- [streamlit_app.py](streamlit_app.py)
-- [requirements.txt](requirements.txt)
-- [.streamlit/config.toml](.streamlit/config.toml)
-- [source/](source/)
-- [utils/data_loader.py](utils/data_loader.py)
-- [utils/data_cleaner.py](utils/data_cleaner.py)
-- [utils/graph.py](utils/graph.py)
-- [utils/graph_altair.py](utils/graph_altair.py)
-- [utils/month_filter.py](utils/month_filter.py)
+- `app.py`: Main dashboard interface.
+- `outage_processor.py`: Backend batch script that parses raw email text into structured data.
+- `outage_reporter.py`: Headless script for generating PDF reports via Task Scheduler.
+- `outage_master.db`: SQLite database storing the incident history (auto-generated).
+- `requirements.txt`: Project dependencies.
+- `utils/`: Helper modules for data loading, cleaning, and graphing.
+
+## Architecture
+This tool implements a **Hybrid Automation Architecture**:
+1.  **Ingestion:** Automation flow saves raw vendor notifications to a local `Input` directory.
+2.  **Processing:** `outage_processor.py` scans for new files, applies Regex extraction, and upserts data into `outage_master.db`.
+3.  **Visualization:** Streamlit reads the local database to display live outage statistics.
+
+## Setup & Configuration
+1.  **Database Path:** Configure the `DB_PATH` variable in `app.py` and `outage_processor.py` to point to your shared data directory.
+2.  **Regex Patterns:** If adapting for a new vendor, update the regex logic in `outage_processor.py` -> `parse_incident_email()`.
 
 Quick overview
 - Two Streamlit apps:
@@ -55,7 +61,11 @@ source .venv/bin/activate
 
 pip install -r requirements.txt
 ```
-2. Launch dashboard
+2. Initialize the database by running the processor once:
+```bash
+python outage_processor.py
+```
+3. Launch dashboard
 
 - Altair dashboard
 ```bash
