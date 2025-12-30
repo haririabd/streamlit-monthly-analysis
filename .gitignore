@@ -1,11 +1,13 @@
 source/
 
 # Environments 
-.env 
-.venv 
-env/ 
-venv/ 
+.env
+.venv
+env/
+venv/
 myvenv/
-ENV/ 
-env.bak/ 
-venv.bak/ 
+ENV/
+env.bak/
+venv.bak/
+__pycache__/
+*.db

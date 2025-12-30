@@ -1,10 +1,32 @@
-import streamlit as st
+import os
 import pandas as pd
+import streamlit as st
+from dotenv import load_dotenv
 from datetime import datetime
-from utils.data_loader import load_excel
-from utils.data_cleaner import clean_tt_data
+
+# Utils
+from utils.data_loader import load_excel, load_data
+from utils.data_cleaner import clean_tt_data, clean_db_data
 from utils.month_filter import get_month_filters
-from utils.graph_altair import build_downtime_table, plot_top10_sites_by_downtime_altair, plot_top_repeated_sites_bar, plot_repeated_sites_comparison
+
+# Function in graph
+from utils.graph_altair import (
+    build_downtime_table,
+    plot_top10_sites_by_downtime_altair,
+    plot_top_repeated_sites_bar,
+    plot_repeated_sites_comparison
+)
+
+load_dotenv()
+
+BASE_DIR = os.getenv("BASE_DIR")
+DB_NAME = os.getenv("DB_NAME", "outage_master.db")
+
+if not BASE_DIR:
+    st.error("Configuration Error: BASE_DIR not set in .env file")
+    st.stop()
+
+DB_PATH = os.path.join(BASE_DIR, DB_NAME)
 
 st.set_page_config(
     page_title="5G Outage Analysis Dashboard",
@@ -18,19 +40,25 @@ st.set_page_config(
 Based on https://github.com/streamlit/demo-stockpeers/
 """
 
-""  # Add some space.
+""
 
-# Load Data
-df_raw = load_excel()
-df_clean = clean_tt_data(df_raw)
+# df_raw = load_excel()
+df_raw = load_data(DB_PATH) # load from DB
+
+# df_clean = clean_tt_data(df_raw)
+df_clean = clean_db_data(df_raw) # 
 df_clean = df_clean.dropna(subset=["end_date"])
 
+if df_clean.empty:
+    st.warning("No data found in database. Waiting for processor to run...")
+    st.stop()
+    
+# Filter data based on user's month selection
+filters = get_month_filters(df_clean)
 today = datetime.today()
 current_period = pd.Period(today, freq="M")
 current_month_name = datetime.now().strftime("%B %Y")  # e.g., "November"
-    
-# Filtering data set based on user's month selection
-filters = get_month_filters(df_clean)
+
 df_current = df_clean[df_clean["month"] == filters["current"]] # Filter for current month
 df_last = df_clean[df_clean["month"] == filters["last"]] # Filter for last full month
 df_compare = df_clean[df_clean["month"].isin([filters["current"], filters["last"]])] # Comparison: current vs last

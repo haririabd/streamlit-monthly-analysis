@@ -2,3 +2,5 @@ streamlit
 pandas
 openpyxl   # for Excel support
 altair
+python-dotenv
+fpdf
