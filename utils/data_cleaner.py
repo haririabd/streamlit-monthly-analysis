@@ -31,7 +31,7 @@ def clean_db_data(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     # Match column name
-    # DB has 'site_id', graphs expect 'siteid'. I'm lazy to change all of them
+    # DB has 'site_id', graphs expect 'siteid'
     df = df.rename(columns={
         "site_id": "siteid",
         "incident_time": "start_date",

@@ -9,5 +9,8 @@ myvenv/
 ENV/
 env.bak/
 venv.bak/
+
+# Python artifacts
 __pycache__/
 *.db
+*.pyc
