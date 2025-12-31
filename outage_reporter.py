@@ -99,9 +99,11 @@ def generate_monthly_report():
     
     target_period = pd.Period(last_month_end, freq='M')
     target_month_str = target_period.strftime("%B %Y")
+    target_month_short = target_period.strftime("%b %Y")
     
     prev_period = target_period - 1
     prev_month_str = prev_period.strftime("%B %Y")
+    prev_month_short = prev_period.strftime("%b %Y")
 
     # TEST OVERRIDE (Optional)
     # target_month_str = "2025-11"
@@ -204,7 +206,7 @@ def generate_monthly_report():
     # >>> Chart 2 (Left)
     pdf.set_xy(margin_x, row2_y)
     pdf.set_font("Arial", 'B', 11)
-    pdf.cell(col_half_width, 8, f"Top 10 Repeated Sites by {target_month_str} and {prev_month_str}", 0, 1, 'L')
+    pdf.cell(col_half_width, 8, f"Top 10 Repeated Sites by {target_month_short} and {prev_month_short}", 0, 1, 'L')
     
     pdf.image(chart_paths['comparison'], x=margin_x, y=row2_y + 8, w=col_half_width - 5, h=row2_height - 10)
 

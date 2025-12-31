@@ -100,9 +100,19 @@ def plot_top10_sites_by_downtime_altair(df, selected_period):
         fontSize=18,
         fontWeight="bold",
         color="#e2e8f0"
+    ).configure_axisX(
+        ticks=False,
+        domain=False,
+        grid=True,
+        gridDash=[4, 4]
     ).configure_axisY(
         labelFont="Arial",
-        labelFontSize=14
+        labelFontSize=14,
+        labelPadding=5,
+        ticks=False,
+        domain=False
+    ).configure_view(
+        stroke=None
     )
 
     return chart
@@ -123,7 +133,9 @@ def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=1
             y=alt.Y("Count:Q", title="Occurance"),
             color=alt.Color("Month:N", title=None,
                             scale=alt.Scale(range=["#8250c4", "#86c9c7"]),
-                            legend=alt.Legend(orient="top")
+                            legend=alt.Legend(
+                                orient="top-right"
+                                )
                             ),
             tooltip=["SiteID", "Month", "Count"]
         )
@@ -132,15 +144,25 @@ def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=1
             height=450
         )
         .configure_axisX(
-        labelAngle=-45,   # slant labels at -45 degrees
+        labelPadding=10,
+        labelAngle=-30,   # slant labels at -45 degrees
         labelFont="Arial",
-        labelFontSize=12
-        )
-        .configure_title(
+        labelFontSize=12,
+        ticks=False,
+        domain=False
+        ).configure_axisY(
+        labelPadding=5,
+        ticks=False,
+        domain=False,
+        grid=True,
+        gridDash=[4, 4]
+        ).configure_title(
             font="Helvetica",
             fontSize=18,
             fontWeight="bold",
             color="#e2e8f0"
+        ).configure_view(
+            stroke=None
         )
     )
 
@@ -173,11 +195,21 @@ def plot_top_repeated_sites_bar(df, selected_period, top_n=10):
         )
         .configure_axisX(
             labelFont="Arial",
-            labelFontSize=12
+            labelFontSize=12,
+            ticks=False,
+            domain=False,
+            grid=True,
+            gridDash=[4, 4]
         )
         .configure_axisY(
             labelFont="Arial",
-            labelFontSize=14
+            labelFontSize=14,
+            labelPadding=5,
+            ticks=False,
+            domain=False
+            
+        ).configure_view(
+            stroke=None
         )
     )
 
