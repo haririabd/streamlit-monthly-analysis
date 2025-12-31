@@ -60,7 +60,7 @@ def create_charts(df, current_month_period, prev_month_period):
     # CHART 1: Top 10 Downtime (Row 1 Left - Wide)
     # Target: 60% of Page Width. Approx 600px wide for the image.
     # -------------------------------------------------------
-    chart1 = plot_top10_sites_by_downtime_altair(curr_df)
+    chart1 = plot_top10_sites_by_downtime_altair(curr_df, current_month_period)
     # Remove Altair title since we add it in PDF
     chart1 = chart1.properties(title="") 
     path1 = os.path.join(temp_dir, "chart1_downtime.png")
@@ -82,7 +82,7 @@ def create_charts(df, current_month_period, prev_month_period):
     # CHART 3: Frequency (Row 2 Right - Half)
     # Target: 50% Page Width.
     # -------------------------------------------------------
-    chart3 = plot_top_repeated_sites_bar(curr_df)
+    chart3 = plot_top_repeated_sites_bar(curr_df, current_month_period)
     chart3 = chart3.properties(title="")
     path3 = os.path.join(temp_dir, "chart3_frequency.png")
     save_altair_chart(chart3, path3, width_px=350, height_px=200)
@@ -98,10 +98,10 @@ def generate_monthly_report():
     last_month_end = first_of_this_month - datetime.timedelta(days=1)
     
     target_period = pd.Period(last_month_end, freq='M')
-    target_month_str = target_period.strftime("%Y-%m")
+    target_month_str = target_period.strftime("%B %Y")
     
     prev_period = target_period - 1
-    prev_month_str = prev_period.strftime("%Y-%m")
+    prev_month_str = prev_period.strftime("%B %Y")
 
     # TEST OVERRIDE (Optional)
     # target_month_str = "2025-11"
@@ -144,8 +144,8 @@ def generate_monthly_report():
     # Layout: [ Chart 1 (60%) ] [ Metrics & Title (40%) ]
     
     # Define widths
-    col1_width = page_width * 0.60
-    col2_width = page_width * 0.40
+    col1_width = page_width * 0.70
+    col2_width = page_width * 0.30
     row1_height = 85 # mm
 
     # >>> Column 2: TITLE & METRICS (Right Side)
@@ -187,7 +187,7 @@ def generate_monthly_report():
     # Title for Chart 1
     pdf.set_xy(margin_x, margin_y)
     pdf.set_font("Arial", 'B', 11)
-    pdf.cell(col1_width, 8, "1. Top 10 Sites by Downtime Duration", 0, 1, 'L')
+    pdf.cell(col1_width, 8, f"Top 10 Highest Downtime for {target_month_str}", 0, 1, 'L')
     
     # Image 1
     # x, y, w, h
@@ -204,13 +204,13 @@ def generate_monthly_report():
     # >>> Chart 2 (Left)
     pdf.set_xy(margin_x, row2_y)
     pdf.set_font("Arial", 'B', 11)
-    pdf.cell(col_half_width, 8, f"2. Trend Comparison ({target_month_str} vs Prev)", 0, 1, 'L')
+    pdf.cell(col_half_width, 8, f"Top 10 Repeated Sites by {target_month_str} and {prev_month_str}", 0, 1, 'L')
     
     pdf.image(chart_paths['comparison'], x=margin_x, y=row2_y + 8, w=col_half_width - 5, h=row2_height - 10)
 
     # >>> Chart 3 (Right)
     pdf.set_xy(margin_x + col_half_width, row2_y)
-    pdf.cell(col_half_width, 8, f"3. Top 10 Most Frequent Sites ({target_month_str})", 0, 1, 'L')
+    pdf.cell(col_half_width, 8, f"Top 10 Most Repeated Sites for {target_month_str}", 0, 1, 'L')
     
     pdf.image(chart_paths['frequency'], x=margin_x + col_half_width, y=row2_y + 8, w=col_half_width - 5, h=row2_height - 10)
 

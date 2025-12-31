@@ -173,19 +173,11 @@ def plot_top_repeated_sites_bar(df, selected_period, top_n=10):
         )
         .configure_axisX(
             labelFont="Arial",
-            labelFontSize=12,
-            labelColor="#e2e8f0",
-            titleFont="Helvetica",
-            titleFontSize=14,
-            titleColor="#e2e8f0"
+            labelFontSize=12
         )
         .configure_axisY(
             labelFont="Arial",
-            labelFontSize=14,
-            labelColor="#e2e8f0",
-            titleFont="Helvetica",
-            titleFontSize=14,
-            titleColor="#e2e8f0"
+            labelFontSize=14
         )
     )
 
