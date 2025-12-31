@@ -1,5 +1,7 @@
 # Lightweight Automated Streamlit Outage Analysis Dashboard
 
+![Architecture Diagram](docs/Hybrid_Automation_Workflow.png)
+
 A lightweight, automated pipeline for tracking site outages and generating monthly downtime reports.
 Designed to ingest vendor email notifications, parse unstructured data, and visualize network availability metrics via Streamlit
 
