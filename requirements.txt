@@ -4,3 +4,4 @@ openpyxl   # for Excel support
 altair
 python-dotenv
 fpdf
+vl-convert-python

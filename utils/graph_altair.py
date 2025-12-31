@@ -23,7 +23,7 @@ def get_top_sites_by_downtime_df(df, top_n=10):
 # (like Readable Duration) alongside the aggregated values.
     return pd.DataFrame({
         "SiteID": top_sites.index,
-        "Max Downtime (days)": durations,
+        "Downtime in days": durations,
         "Readable Duration": readable
     })
     
@@ -55,7 +55,6 @@ def get_repeated_sites_comparison(df, selected_period, previous_period, top_n=10
     )
     last_counts.columns = ["SiteID", previous_period.strftime("%b %Y")]
 
-
     # Merge both
     merged = pd.merge(current_counts, last_counts, on="SiteID", how="left").fillna(0)
 
@@ -73,16 +72,16 @@ def reshape_for_altair(merged):
     return chart_data
 
 # Chart
-def plot_top10_sites_by_downtime_altair(df):
+def plot_top10_sites_by_downtime_altair(df, selected_period):
     chart_data = get_top_sites_by_downtime_df(df)
 
     base = alt.Chart(chart_data).encode(
-        x=alt.X("Max Downtime (days):Q", title="Total Downtime (Days)"),
-        y=alt.Y("SiteID:N", sort="-x", title="Site ID")
+        x=alt.X("Downtime in days:Q", title="Total Downtime (Days)"),
+        y=alt.Y("SiteID:N", sort="-x", title="SiteID")
     )
 
-    bars = base.mark_bar(color="#9273c8").encode(
-        tooltip=["SiteID", "Max Downtime (days)", "Readable Duration"]
+    bars = base.mark_bar(color="#8250c4").encode(
+        tooltip=["SiteID", "Downtime in days", "Readable Duration"]
     )
 
     labels = base.mark_text(
@@ -92,8 +91,9 @@ def plot_top10_sites_by_downtime_altair(df):
         text="Readable Duration"
     )
 
+    month_label = selected_period.strftime("%B %Y")
     chart = (bars + labels).properties(
-        title="Top 10 Sites with Highest Downtime",
+        title=f"Top 10 Highest Downtime for {month_label}",
         height=450
     ).configure_title(
         font="Helvetica",
@@ -119,14 +119,16 @@ def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=1
         alt.Chart(chart_data)
         .mark_line(point=True)
         .encode(
-            x=alt.X("SiteID:N", sort=list(merged["SiteID"]), title="Site ID"),
-            y=alt.Y("Count:Q", title="Downtime Frequency"),
-            color=alt.Color("Month:N", title="Month",
-                            scale=alt.Scale(range=["#9273c8", "#86c9c7"])),
+            x=alt.X("SiteID:N", sort=list(merged["SiteID"]), title="SiteID"),
+            y=alt.Y("Count:Q", title="Occurance"),
+            color=alt.Color("Month:N", title=None,
+                            scale=alt.Scale(range=["#8250c4", "#86c9c7"]),
+                            legend=alt.Legend(orient="top")
+                            ),
             tooltip=["SiteID", "Month", "Count"]
         )
         .properties(
-            title=f"Top {top_n} Sites with Most Repeated Downtime ({selected_period.strftime('%b %Y')} vs {previous_period.strftime('%b %Y')})",
+            title=f"Top {top_n} Repeated Sites by {selected_period.strftime('%b %Y')} and {previous_period.strftime('%b %Y')}",
             height=450
         )
         .configure_axisX(
@@ -144,22 +146,23 @@ def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=1
 
     return chart
 
-def plot_top_repeated_sites_bar(df, top_n=10):
+def plot_top_repeated_sites_bar(df, selected_period, top_n=10):
     chart_data = get_top_repeated_sites(df, top_n)
-
+    
+    month_label = selected_period.strftime("%B %Y")
     chart = (
         alt.Chart(chart_data)
-        .mark_bar(color="#9273c8")
+        .mark_bar(color="#8250c4")
         .encode(
-            x=alt.X("Count:Q", title="Downtime Frequency"),
-            y=alt.Y("SiteID:N", sort="-x", title="Site ID"),
+            x=alt.X("Count:Q", title="Occurance"),
+            y=alt.Y("SiteID:N", sort="-x", title="SiteID"),
             tooltip=[
                 alt.Tooltip("SiteID:N", title="Site ID"),
                 alt.Tooltip("Count:Q", title="Frequency")
             ]
         )
         .properties(
-            title=f"Top {top_n} Sites with Most Repeated Downtime",
+            title=f"Top {top_n} Most Repeated Sites for {month_label}",
             height=450
         )
         .configure_title(

@@ -40,8 +40,7 @@ st.set_page_config(
 
 if DATA_SOURCE == 'excel':
     st.warning(
-        f"⚠️ **TEST MODE ACTIVE:** Displaying historical data from Excel. "
-        "Live database connection is currently **BYPASSED**."
+        f"⚠️ **TEST MODE:** Displaying historical data from Excel"
     )
 # ---------------------------------
 """
@@ -102,7 +101,7 @@ with st.container():
             selected_label = selected_period.strftime("%B %Y")
     
     with col2:
-        st.altair_chart(plot_top10_sites_by_downtime_altair(df_selected), width="stretch")
+        st.altair_chart(plot_top10_sites_by_downtime_altair(df_selected, selected_period), width="stretch")
         
     with col3:
         st.dataframe(build_downtime_table(df_selected))
@@ -119,4 +118,4 @@ with st.container():
     with col1:
         st.altair_chart(plot_repeated_sites_comparison(df_clean, selected_period, previous_period), width="stretch")
     with col2:
-        st.altair_chart(plot_top_repeated_sites_bar(df_selected), width="stretch")
+        st.altair_chart(plot_top_repeated_sites_bar(df_selected, selected_period), width="stretch")
