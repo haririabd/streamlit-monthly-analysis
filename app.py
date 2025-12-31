@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Utils
-from utils.data_loader import load_excel, load_data
+from utils.data_loader import load_data
 from utils.data_cleaner import clean_tt_data, clean_db_data
 from utils.month_filter import get_month_filters
 
@@ -18,6 +18,10 @@ from utils.graph_altair import (
 )
 
 load_dotenv()
+
+# For seamless Data Source switch
+DATA_SOURCE = os.getenv("DATA_SOURCE", "db").lower()
+EXCEL_FILENAME = os.getenv("EXCEL_FILENAME", "sourcefile.xlsx")
 
 BASE_DIR = os.getenv("BASE_DIR")
 DB_NAME = os.getenv("DB_NAME", "outage_master.db")
@@ -34,6 +38,12 @@ st.set_page_config(
     layout="wide",
 )
 
+if DATA_SOURCE == 'excel':
+    st.warning(
+        f"⚠️ **TEST MODE ACTIVE:** Displaying historical data from Excel. "
+        "Live database connection is currently **BYPASSED**."
+    )
+# ---------------------------------
 """
 # :material/query_stats: 5G Monthly Outage Analysis
 
@@ -41,12 +51,13 @@ Based on https://github.com/streamlit/demo-stockpeers/
 """
 
 ""
+try:
+    df_raw = load_data()
+except Exception as e:
+    st.error(f"Failed to load data: {e}")
+    st.stop()
 
-# df_raw = load_excel()
-df_raw = load_data(DB_PATH) # load from DB
-
-# df_clean = clean_tt_data(df_raw)
-df_clean = clean_db_data(df_raw) # 
+df_clean = clean_db_data(df_raw)
 df_clean = df_clean.dropna(subset=["end_date"])
 
 if df_clean.empty:
