@@ -60,7 +60,7 @@ def create_charts(df, current_month_period, prev_month_period):
     # CHART 1: Top 10 Downtime (Row 1 Left - Wide)
     # Target: 60% of Page Width. Approx 600px wide for the image.
     # -------------------------------------------------------
-    chart1 = plot_top10_sites_by_downtime_altair(curr_df, current_month_period)
+    chart1 = plot_top10_sites_by_downtime_altair(curr_df, current_month_period, for_pdf=True)
     # Remove Altair title since we add it in PDF
     chart1 = chart1.properties(title="") 
     path1 = os.path.join(temp_dir, "chart1_downtime.png")
@@ -72,7 +72,7 @@ def create_charts(df, current_month_period, prev_month_period):
     # CHART 2: Comparison (Row 2 Left - Half)
     # Target: 50% Page Width.
     # -------------------------------------------------------
-    chart2 = plot_repeated_sites_comparison(df, current_month_period, prev_month_period)
+    chart2 = plot_repeated_sites_comparison(df, current_month_period, prev_month_period, for_pdf=True)
     chart2 = chart2.properties(title="")
     path2 = os.path.join(temp_dir, "chart2_comparison.png")
     save_altair_chart(chart2, path2, width_px=350, height_px=200)
@@ -82,7 +82,7 @@ def create_charts(df, current_month_period, prev_month_period):
     # CHART 3: Frequency (Row 2 Right - Half)
     # Target: 50% Page Width.
     # -------------------------------------------------------
-    chart3 = plot_top_repeated_sites_bar(curr_df, current_month_period)
+    chart3 = plot_top_repeated_sites_bar(curr_df, current_month_period, for_pdf=True)
     chart3 = chart3.properties(title="")
     path3 = os.path.join(temp_dir, "chart3_frequency.png")
     save_altair_chart(chart3, path3, width_px=350, height_px=200)

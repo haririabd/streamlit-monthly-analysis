@@ -72,7 +72,7 @@ def reshape_for_altair(merged):
     return chart_data
 
 # Chart
-def plot_top10_sites_by_downtime_altair(df, selected_period):
+def plot_top10_sites_by_downtime_altair(df, selected_period, top_n=10, for_pdf: bool = False):
     chart_data = get_top_sites_by_downtime_df(df)
 
     base = alt.Chart(chart_data).encode(
@@ -84,14 +84,28 @@ def plot_top10_sites_by_downtime_altair(df, selected_period):
         tooltip=["SiteID", "Downtime in days", "Readable Duration"]
     )
 
-    labels = base.mark_text(
-        align="left", baseline="middle", dx=3,
-        color="#e2e8f0", fontSize=14
-    ).encode(
+    month_label = selected_period.strftime("%B %Y")
+
+    # conditional styling for PDF vs dashboard
+    if for_pdf:
+        title_color = "#111111"
+        axis_x_cfg = dict(labelFont="Arial", labelFontSize=10, labelColor="#111111",
+                          ticks=False, domain=False, grid=True, gridDash=[4, 4])
+        axis_y_cfg = dict(labelFont="Arial", labelFontSize=10, labelColor="#111111",
+                          labelPadding=8, ticks=False, domain=False)
+        view_cfg = dict(stroke=None)
+        label_color = "#111111"
+    else:
+        title_color = "#e2e8f0"
+        axis_x_cfg = dict(ticks=False, domain=False, grid=True, gridDash=[4, 4])
+        axis_y_cfg = dict(labelFont="Arial", labelFontSize=14, labelPadding=5, ticks=False, domain=False)
+        view_cfg = dict(stroke="#ddd")
+        label_color = "#e2e8f0"
+
+    labels = base.mark_text(align="left", baseline="middle", dx=3, color=label_color, fontSize=10).encode(
         text="Readable Duration"
     )
 
-    month_label = selected_period.strftime("%B %Y")
     chart = (bars + labels).properties(
         title=f"Top 10 Highest Downtime for {month_label}",
         height=450
@@ -99,21 +113,8 @@ def plot_top10_sites_by_downtime_altair(df, selected_period):
         font="Helvetica",
         fontSize=18,
         fontWeight="bold",
-        color="#e2e8f0"
-    ).configure_axisX(
-        ticks=False,
-        domain=False,
-        grid=True,
-        gridDash=[4, 4]
-    ).configure_axisY(
-        labelFont="Arial",
-        labelFontSize=14,
-        labelPadding=5,
-        ticks=False,
-        domain=False
-    ).configure_view(
-        stroke=None
-    )
+        color=title_color
+    ).configure_axisX(**axis_x_cfg).configure_axisY(**axis_y_cfg).configure_view(**view_cfg)
 
     return chart
 
@@ -121,11 +122,11 @@ def plot_top10_sites_by_downtime_altair(df, selected_period):
 def build_downtime_table(df):
     return get_top_sites_by_downtime_df(df)
 
-def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=10):
+def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=10, for_pdf: bool = False):
     merged = get_repeated_sites_comparison(df, selected_period, previous_period, top_n)
     chart_data = reshape_for_altair(merged)
 
-    chart = (
+    base_chart = (
         alt.Chart(chart_data)
         .mark_line(point=True)
         .encode(
@@ -143,36 +144,37 @@ def plot_repeated_sites_comparison(df, selected_period, previous_period, top_n=1
             title=f"Top {top_n} Repeated Sites by {selected_period.strftime('%b %Y')} and {previous_period.strftime('%b %Y')}",
             height=450
         )
-        .configure_axisX(
-        labelPadding=10,
-        labelAngle=-30,   # slant labels at -45 degrees
-        labelFont="Arial",
-        labelFontSize=12,
-        ticks=False,
-        domain=False
-        ).configure_axisY(
-        labelPadding=5,
-        ticks=False,
-        domain=False,
-        grid=True,
-        gridDash=[4, 4]
-        ).configure_title(
-            font="Helvetica",
-            fontSize=18,
-            fontWeight="bold",
-            color="#e2e8f0"
-        ).configure_view(
-            stroke=None
-        )
     )
+
+    if for_pdf:
+        title_color = "#111111"
+        axis_x_cfg = dict(labelPadding=10, labelAngle=-30, labelFont="Arial", labelFontSize=12,
+                          labelColor="#111111", ticks=False, domain=False)
+        axis_y_cfg = dict(labelPadding=5, labelFont="Arial", labelFontSize=12, labelColor="#111111",
+                          ticks=False, domain=False, grid=True, gridDash=[4, 4])
+        view_cfg = dict(stroke=None)
+    else:
+        title_color = "#e2e8f0"
+        axis_x_cfg = dict(labelPadding=10, labelAngle=-30, labelFont="Arial", labelFontSize=12,
+                          ticks=False, domain=False)
+        axis_y_cfg = dict(labelPadding=5, ticks=False, domain=False, grid=True, gridDash=[4, 4])
+        view_cfg = dict(stroke="#ddd")
+
+    chart = base_chart.configure_axisX(**axis_x_cfg).configure_axisY(**axis_y_cfg).configure_title(
+        font="Helvetica",
+        fontSize=18,
+        fontWeight="bold",
+        color=title_color
+    ).configure_view(**view_cfg)
 
     return chart
 
-def plot_top_repeated_sites_bar(df, selected_period, top_n=10):
+def plot_top_repeated_sites_bar(df, selected_period, top_n=10, for_pdf: bool = False):
     chart_data = get_top_repeated_sites(df, top_n)
     
     month_label = selected_period.strftime("%B %Y")
-    chart = (
+
+    base = (
         alt.Chart(chart_data)
         .mark_bar(color="#8250c4")
         .encode(
@@ -187,31 +189,27 @@ def plot_top_repeated_sites_bar(df, selected_period, top_n=10):
             title=f"Top {top_n} Most Repeated Sites for {month_label}",
             height=450
         )
-        .configure_title(
-            font="Helvetica",
-            fontSize=18,
-            fontWeight="bold",
-            color="#e2e8f0"
-        )
-        .configure_axisX(
-            labelFont="Arial",
-            labelFontSize=12,
-            ticks=False,
-            domain=False,
-            grid=True,
-            gridDash=[4, 4]
-        )
-        .configure_axisY(
-            labelFont="Arial",
-            labelFontSize=14,
-            labelPadding=5,
-            ticks=False,
-            domain=False
-            
-        ).configure_view(
-            stroke=None
-        )
     )
+
+    if for_pdf:
+        title_color = "#111111"
+        axis_x_cfg = dict(labelFont="Arial", labelFontSize=10, labelColor="#111111",
+                          labelPadding=10, ticks=False, domain=False, grid=True, gridDash=[4, 4])
+        axis_y_cfg = dict(labelFont="Arial", labelFontSize=10, labelColor="#111111",
+                          labelPadding=8, ticks=False, domain=False)
+        view_cfg = dict(stroke=None)
+    else:
+        title_color = "#e2e8f0"
+        axis_x_cfg = dict(labelFont="Arial", labelFontSize=12, ticks=False, domain=False, grid=True, gridDash=[4, 4])
+        axis_y_cfg = dict(labelFont="Arial", labelFontSize=14, labelPadding=5, ticks=False, domain=False)
+        view_cfg = dict(stroke="#ddd")
+
+    chart = base.configure_title(
+        font="Helvetica",
+        fontSize=18,
+        fontWeight="bold",
+        color=title_color
+    ).configure_axisX(**axis_x_cfg).configure_axisY(**axis_y_cfg).configure_view(**view_cfg)
 
     return chart
 
