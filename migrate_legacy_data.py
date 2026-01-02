@@ -20,9 +20,9 @@ EXCEL_PATH = r"" # Update this!
 # Key = Your DB Column Name (Keep these as is)
 # Value = Your Excel Header Name (Change these to match your Excel file)
 COL_MAP = {
-    'site_id': 'Site ID',          # e.g. 'Site_ID' or 'SiteName'
-    'start_time': 'Time Down',     # e.g. 'Incident Start'
-    'end_time': 'Time Up'          # e.g. 'Incident End'
+    'site_id': 'SiteID',          # e.g. 'Site_ID' or 'SiteName'
+    'start_time': 'Start Date',     # e.g. 'Incident Start'
+    'end_time': 'End Date'          # e.g. 'Incident End'
 }
 
 def format_date_for_db(dt_obj):
