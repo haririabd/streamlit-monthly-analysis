@@ -26,7 +26,7 @@ st.markdown("Use this page to verify if your **Regex** is extracting data correc
 
 # --- LOAD DATA ---
 if os.path.exists(DB_PATH):
-    df_raw = load_data(DB_PATH)
+    df_raw = load_data()
 else:
     st.warning(f"Database not found at {DB_PATH}")
     st.stop()
@@ -56,7 +56,7 @@ with tab1:
 
         st.dataframe(
             df_clean, 
-            use_container_width=True, 
+            width="stretch",
             height=600,
             column_config={
                 "start_date": st.column_config.DatetimeColumn(format="D MMM YYYY, HH:mm"),
